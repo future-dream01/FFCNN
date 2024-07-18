@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset,DataLoader
 from PIL import Image
 
-# 创建自己的数据集类，用于统一数据集图片尺寸
+# 创建自己的数据集类，统一数据集图片尺寸至 512*512
 class Data_prepare(Dataset):
     def __init__(self,img_dir,):
         super(Data_prepare,self).__init__()
@@ -18,9 +18,10 @@ class Data_prepare(Dataset):
         image=self.tranform(image)                                      # 将图片大小转换为 512*512，统一尺寸
         return image
 
+# 加载数据函数，将数据集中图片加载至数据加载器中
 def load_data(path,batch_size):
     dataset=Data_prepare(path)      # 数据集
-    dataloader=DataLoader(dataset,batch_size=batch_size,shuffle=True, num_workers=4)
+    dataloader=DataLoader(dataset,batch_size=batch_size,shuffle=True, num_workers=4)  # 
     return dataloader
 
 
