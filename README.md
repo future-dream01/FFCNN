@@ -1,8 +1,7 @@
-<p style="text-align: center;">
-  <img src="pictures/logo.png" height="120">
-</p>
+<h1 align="center">SASDN
 
----
+（Stepwise Adversarial Stable Diffusion Network）</h1>
+
 # 🚀用于超分辨率重建的逐步对抗式稳定扩散网络🚀
 1.  网络将两种当前较为成熟的图像生成式网络模型：生成对抗式网络和稳定扩散网络结构相融合
 2.  网络主要创新点在于：
