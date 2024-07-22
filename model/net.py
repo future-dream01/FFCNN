@@ -2,9 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class Backbone(nn.Module):
+# 生成器骨架
+class Backbone_G(nn.Module):
     def __init__(self,oringin_size):
-        super(Backbone,self).__init__()
+        super(Backbone_G,self).__init__()
         self.feture_map=[]
         self.relu=nn.ReLU()     # 激活函数
         # 第一小层 尺寸：oringin_size->oringin_size+16 ; 通道数：1->128
@@ -116,8 +117,8 @@ class Backbone(nn.Module):
         self.feture_map.append(out_4)   # 192*192 128
         return self.feture_map
 
-# 特征融合，将本层走过的特征图通道数合成 1 个
-class Neck(nn.Module):
+# 生成器特征融合，将本层走过的特征图通道数合成 1 个
+class Neck_G(nn.Module):
     def __init__(self,oringin_size,target_size):
         self.relu=nn.ReLU()
         self.conv1=nn.Conv2d(in_channels=512,out_channels=256,kernel_size=3,stride=1)
@@ -141,6 +142,108 @@ class Neck(nn.Module):
         out4=self.conv4(out4)       # 全部融合后调整通道数->1
         return out4                 # 最终输出的上采样之后的图像
 
+# 判别器骨架
+class Backbone_D(nn.Module):
+    def __init__(self,origin_size):
+        self.model_1=nn.Sequential(
+            nn.Conv2d(in_channels=1,out_channels=16,kernel_size=3,stride=1),
+            nn.BatchNorm2d(16),
+            nn.Relu(),
+            nn.Conv2d(in_channels=16,out_channels=32,kernel_size=3,stride=1),
+            nn.BatchNorm2d(32),
+            nn.Relu(),
+            SEModule(32),
+            nn.Conv2d(in_channels=32,out_channels=64,kernel_size=3,stride=1),
+            nn.BatchNorm2d(64),
+            nn.Relu(),
+        )
+        self.model_2=nn.Sequential(
+            SEModule(64),
+            nn.Relu(),
+            nn.Resn(64,64),
+            nn.Conv2d(in_channels=64,out_channels=128,kernel_size=3,stride=1),
+            nn.BatchNorm2d(256),
+            nn.Relu(),
+            nn.Conv2d(in_channels=256,out_channels=512,kernel_size=3,stride=1),
+            nn.BatchNorm2d(512),
+            nn.Relu(),
+            nn.Conv2d(in_channels=512,out_channels=256,kernel_size=3,stride=1),
+            nn.BatchNorm2d(256),
+            nn.Relu(),
+        )
+        self.model_3=nn.Sequential(
+            SEModule(256),
+            nn.Relu(),
+            nn.Resn(256,512),
+            nn.Relu(),
+            nn.Conv2d(in_channels=512,out_channels=1024,kernel_size=3,stride=1),
+            nn.BatchNorm2d(1024),
+            nn.Relu(),
+        )
+
+    def forward(self,x):
+        out=[]
+        out_1=self.model_1(x)
+        out_2=self.model_2(out_1)
+        out_3=self.model_3(out_2)
+        out.append(out_1)       # 通道数:64
+        out.append(out_2)       # 通道数:256
+        out.append(out_3)       # 通道数:1024
+        return out
+
+# 判别器特征融合
+class Neck_D(nn.Module):
+    def __init__(self):
+        self.relu=nn.ReLU()
+        self.conv1=nn.Conv2d(in_channels=1344,out_channels=1024,kernel_size=3,stride=1)
+        self.bn1=nn.BatchNorm2d(1024)
+        self.conv2=nn.Conv2d(in_channels=1024,out_channels=512,kernel_size=3,stride=1)
+        self.bn2=nn.BatchNorm2d(512)
+        self.conv3=nn.Conv2d(in_channels=512,out_channels=256,kernel_size=3,stride=1)
+        self.bn3=nn.BatchNorm2d(256)
+        self.max=nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv4=nn.Conv2d(in_channels=256,out_channels=64,kernel_size=3,stride=1)
+        self.bn4=nn.BatchNorm2d(64)
+
+    def forward(self,x):
+        out=torch.cat((x[0],x[1]),dim=1)   # 一、二融合，通道数变为：320
+        out=torch.cat((out,x[2]),dim=1)    # 与三融合，通道数变为 1344
+        out=self.conv1(out)
+        out=self.bn1(out)
+        out=self.relu(out)
+        out=self.conv2(out)
+        out=self.bn2(out)
+        out=self.relu(out)
+        out=self.conv3(out)
+        out=self.bn3(out)
+        out=self.relu(out)      # 通道数：256
+        out=self.conv4(out)
+        out=self.bn4(out)
+        out=self.relu(out)      # 通道数：64
+        out=self.max(out)       # 通道数：64 尺寸变为原先二分之一 
+        out=self.relu(out)
+        out=self.max(out)       # 通道数：64 尺寸变为原先二分之一 
+        return out
+
+# 判别器解耦头
+class Head_D(nn.Module):
+    def __init__(self,shape):
+        self.model=nn.Sequential(
+            nn.Linear(in_features=(shape//2)*(shape//2)*64, out_features=1024),
+            nn.Linear(in_features=1024, out_features=512),
+            nn.Linear(in_features=512, out_features=256),
+            nn.Linear(in_features=256, out_features=128),
+            nn.Linear(in_features=128, out_features=64),
+            nn.Linear(in_features=64, out_features=32),
+            nn.Linear(in_features=32, out_features=16),
+            nn.Linear(in_features=16, out_features=1),
+            nn.Sigmoid()
+        )
+
+    def forward(self,x):
+        out=self.model(x)
+        return out
+
 # 指定分辨率上采样卷积层
 class Upsample_Conv(nn.Module):
     def __init__(self, in_channels, out_channels, input_size, output_size):
@@ -160,7 +263,7 @@ class Upsample_Conv(nn.Module):
     def forward(self, x):
         return self.conv_transpose(x)
 
-# 残差块
+# 残差模块
 class Resn(nn.Module):
     def __init__(self,input_channel,output_channel):
         super(Resn,self).__init__()
@@ -221,3 +324,13 @@ class SEModule(nn.Module):
         y = self.avg_pool(x).view(b, c)
         y = self.fc(y).view(b, c, 1, 1)
         return x * y.expand_as(x)
+
+# MSE、L1损失
+def loss_mse_l1(output,noize_T,upconv_T):
+    mse=nn.MSELoss()
+    l1=nn.L1Loss()
+    mse_noize=mse(output,noize_T)
+    mse_upconv=mse(output,upconv_T)
+    l1_noize=l1(output,noize_T)
+    l1_upconv=l1(output,upconv_T)
+    return (mse_noize+mse_upconv)*0.7+ (l1_noize+l1_upconv)*0.3

@@ -30,20 +30,10 @@ class Forward_Diffusion:
             self.down_x.append(F.interpolate(x, scale_factor=(512-64*i)/512, mode='bilinear', align_corners=False))
         return self.down_x
     
-class Back_Diffusion_G(nn.Module):
+
+class Back_Diffusion_G():
     def __init__(self):
         super(Back_Diffusion_G,self).__init__()
-        self.Backbone1=nn.Sequential(
-
-
-
-
-
-
-        )
-        pass
-    
-    def Conv_128_292():     # 第一个卷积、上采样层：128->292
 
         pass
 
