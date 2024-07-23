@@ -119,7 +119,8 @@ class Backbone_G(nn.Module):
 
 # 生成器特征融合，将本层走过的特征图通道数合成 1 个
 class Neck_G(nn.Module):
-    def __init__(self,oringin_size,target_size):
+    def __init__(self,oringin_size):
+        super(Neck_G,self).__init__()
         self.relu=nn.ReLU()
         self.conv1=nn.Conv2d(in_channels=512,out_channels=256,kernel_size=3,stride=1)
         self.conv2=nn.Conv2d(in_channels=128,out_channels=64,kernel_size=3,stride=1)
@@ -145,6 +146,7 @@ class Neck_G(nn.Module):
 # 判别器骨架
 class Backbone_D(nn.Module):
     def __init__(self,origin_size):
+        super(Backbone_D,self).__init__()
         self.model_1=nn.Sequential(
             nn.Conv2d(in_channels=1,out_channels=16,kernel_size=3,stride=1),
             nn.BatchNorm2d(16),
@@ -194,6 +196,7 @@ class Backbone_D(nn.Module):
 # 判别器特征融合
 class Neck_D(nn.Module):
     def __init__(self):
+        super(Neck_D,self).__init__()
         self.relu=nn.ReLU()
         self.conv1=nn.Conv2d(in_channels=1344,out_channels=1024,kernel_size=3,stride=1)
         self.bn1=nn.BatchNorm2d(1024)
@@ -228,6 +231,7 @@ class Neck_D(nn.Module):
 # 判别器解耦头
 class Head_D(nn.Module):
     def __init__(self,shape):
+        super(Head_D,self).__init__()
         self.model=nn.Sequential(
             nn.Linear(in_features=(shape//2)*(shape//2)*64, out_features=1024),
             nn.Linear(in_features=1024, out_features=512),
@@ -237,7 +241,6 @@ class Head_D(nn.Module):
             nn.Linear(in_features=64, out_features=32),
             nn.Linear(in_features=32, out_features=16),
             nn.Linear(in_features=16, out_features=1),
-            nn.Sigmoid()
         )
 
     def forward(self,x):
@@ -327,10 +330,15 @@ class SEModule(nn.Module):
 
 # MSE、L1损失
 def loss_mse_l1(output,noize_T,upconv_T):
+    MSE=0
+    L1=0
     mse=nn.MSELoss()
     l1=nn.L1Loss()
-    mse_noize=mse(output,noize_T)
-    mse_upconv=mse(output,upconv_T)
-    l1_noize=l1(output,noize_T)
-    l1_upconv=l1(output,upconv_T)
-    return (mse_noize+mse_upconv)*0.7+ (l1_noize+l1_upconv)*0.3
+    for i in range (0,6):
+        mse_noize=mse(output[i],noize_T[i+1])
+        mse_upconv=mse(output[i],upconv_T[i+1])
+        l1_noize=l1(output[i],noize_T[i+1])
+        l1_upconv=l1(output[i],upconv_T[i+1])
+        MSE+=(mse_noize+mse_upconv)
+        L1+=(l1_noize+l1_upconv)
+    return MSE*0.7+ L1*0.3
