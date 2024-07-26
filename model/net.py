@@ -342,3 +342,5 @@ def loss_mse_l1(output,noize_T,upconv_T):
         MSE+=(mse_noize+mse_upconv)
         L1+=(l1_noize+l1_upconv)
     return MSE*0.7+ L1*0.3
+
+def loss_D(G_1,G_2,T_N_DS,T_DS,D_N_1,):
