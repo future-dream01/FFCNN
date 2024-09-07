@@ -1,3 +1,4 @@
-from .generater import Forward_Diffusion,Back_Diffusion_G
-from .discriminator import Discriminator_noize_1,Discriminator_noize_2,Discriminator_texture_1,Discriminator_texture_2
-from .dataload import Data_prepare,load_data
+from .degenerater import DeGenerater
+from .dataload import data_prepare
+from .loss import loss_TOTAL
+from .graph import loss_graph
