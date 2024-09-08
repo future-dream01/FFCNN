@@ -1,0 +1,15 @@
+2024-09-05 21:44:09.647 | INFO     | __main__:train:34 - 开始训练
+2024-09-05 21:44:11.247 | INFO     | __main__:train:57 - epoch:2,batch:1,loss_all:0.5087712407112122
+2024-09-05 21:44:12.203 | INFO     | __main__:train:57 - epoch:2,batch:2,loss_all:1.0207397937774658
+2024-09-05 21:44:13.153 | INFO     | __main__:train:57 - epoch:2,batch:3,loss_all:1.2633692026138306
+2024-09-05 21:44:14.100 | INFO     | __main__:train:57 - epoch:2,batch:4,loss_all:1.3239130973815918
+2024-09-05 21:44:15.091 | INFO     | __main__:train:57 - epoch:2,batch:5,loss_all:0.24762803316116333
+2024-09-05 21:44:16.072 | INFO     | __main__:train:57 - epoch:2,batch:6,loss_all:0.9097310304641724
+2024-09-05 21:44:17.053 | INFO     | __main__:train:57 - epoch:2,batch:7,loss_all:0.6500053405761719
+2024-09-05 21:44:32.900 | INFO     | __main__:train:34 - 开始训练
+2024-09-05 21:44:34.510 | INFO     | __main__:train:57 - epoch:1,batch:1,loss_all:1.4570484161376953
+2024-09-05 21:44:35.462 | INFO     | __main__:train:57 - epoch:1,batch:2,loss_all:1.131548285484314
+2024-09-05 21:44:36.440 | INFO     | __main__:train:57 - epoch:1,batch:3,loss_all:0.5807310342788696
+2024-09-05 21:44:37.401 | INFO     | __main__:train:57 - epoch:1,batch:4,loss_all:0.9161535501480103
+2024-09-05 21:44:38.360 | INFO     | __main__:train:57 - epoch:1,batch:5,loss_all:0.8807814717292786
+2024-09-05 21:44:39.315 | INFO     | __main__:train:57 - epoch:1,batch:6,loss_all:1.1102123260498047
