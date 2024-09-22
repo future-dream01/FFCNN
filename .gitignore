@@ -1,2 +1,3 @@
 *.pth
 /datasets
+/outputs

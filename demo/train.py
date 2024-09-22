@@ -10,16 +10,16 @@ import torch
 from torch.cuda.amp import autocast, GradScaler
 
 # 参数设定
-EPOCHES = 200
+EPOCHES = 250
 BATCHSIZE = 1
-LOAD_CP=False     # 是否需要加载之前的检查点
+LOAD_CP=True     # 是否需要加载之前的检查点
 
-CP_PATH= f'{project_root}/outputs/weights/09-05_21-18/3weights.pth'
+CP_PATH= f'{project_root}/outputs/weights/09-08_14-14/13weights.pth'
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 current_datetime = datetime.now().strftime("%m-%d_%H-%M")
 log_file_path=f'{project_root}/outputs/训练与性能情况/{current_datetime}/损失日志.txt'
 os.makedirs(os.path.dirname(log_file_path),exist_ok=True)
-logger.add(log_file_path,rotation="500 MB",level="INFO")    # 添加日志目标
+logger.add(log_file_path,rotation="5000 MB",level="INFO")    # 添加日志目标
 def train():
     # 训练配置
     dataloader = data_prepare(BATCHSIZE)
