@@ -6,15 +6,16 @@ from PIL import Image
 import os, sys
 
 # 获取项目根目录的绝对路径
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), './..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
 
+# 自定义数据集创建器
 class ImageLabelDataset(Dataset):
     def __init__(self, images_dir, labels_dir):
         self.images_dir = os.path.abspath(images_dir)
         self.labels_dir = os.path.abspath(labels_dir)
 
-        # 获取图片文件名列表
+        # 获取图片文件名列表，以便__len__()方法可以获得数据集大小
         self.image_filenames = sorted(os.listdir(self.images_dir))
         self.label_filenames = sorted(os.listdir(self.labels_dir))
 
@@ -24,17 +25,17 @@ class ImageLabelDataset(Dataset):
     def __len__(self):
         return len(self.image_filenames)
 
-    def __getitem__(self, idx):
-        # 构建图像和标签的完整路径
+    def __getitem__(self, idx):     # 原Dataset类的内置方法
+        # 构建图像和标签的绝对路径
         image_path = os.path.join(self.images_dir, self.image_filenames[idx])
         label_path = os.path.join(self.labels_dir, self.label_filenames[idx])
 
-        # 打开图像和标签
+        # 打开指定图像和标签图片，转为灰度后返回image和label对象并赋予image和label
         image = Image.open(image_path).convert("L")
         label = Image.open(label_path).convert("L")
 
         # 转换为张量
-        image = self.transform(image)
+        image = self.transform(image)       # 讲图片数据转换为张量数据，形状是[channel，height，width]
         label = self.transform(label)
 
         return image, label
