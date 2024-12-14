@@ -14,8 +14,8 @@ from PIL import Image
 
 # 参数设定
 BATCHSIZE = 1
-
-weight_PATH= f'{project_root}/outputs/weights/09-05_22-15/197weights.pth'
+weight_name="12-14_01-50/237weights"
+weight_PATH=f'{project_root}/outputs/weights/{weight_name}.pth' 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 current_datetime = datetime.now().strftime("%m-%d_%H-%M")
 log_file_path=f'{project_root}/outputs/推理结果/{current_datetime}/推理日志.txt'
@@ -31,6 +31,7 @@ def detect():
     D.to(device)
     D.eval()
     result=[]
+    logger.info(f"weight:{weight_name}")
     logger.info("推理开始")
     with torch.no_grad():           # 不需要梯度
         for image ,label in dataloader:
