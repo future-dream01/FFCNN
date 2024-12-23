@@ -131,6 +131,7 @@ class Neck_D(nn.Module):
         self.downconv1=CustomDownsample(512,128,(64,64))
         self.upconv1=Upsample_Conv(512,256,64,64)
         self.upconv2=Upsample_Conv(128,64,128,128)
+        self.sig=nn.Sigmoid()
 
     def forward(self,x):  # x[(128*128 128),(64*64 256),(16*16 512)]
         out1=self.upconv1(x[2])     # x[2]上采样
@@ -143,6 +144,7 @@ class Neck_D(nn.Module):
         out4=self.bn1(out4)               
         out4=self.relu(out4)
         out4=self.conv4(out4)       # 全部融合后调整通道数->1
+        out4=self.sig(out4)
         return out4                 # 最终输出退化之后的图像
 
 

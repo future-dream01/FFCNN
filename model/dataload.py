@@ -1,5 +1,6 @@
 # 训练数据集准备
 import torch 
+import numpy as np
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
@@ -35,11 +36,23 @@ class ImageLabelDataset(Dataset):
         label = Image.open(label_path).convert("L")
 
         # 转换为张量
-        image = self.transform(image)       # 讲图片数据转换为张量数据，形状是[channel，height，width]
-        label = self.transform(label)
+        image = self.to_tensor_no_normalize(image)       # 讲图片数据转换为张量数据，形状是[channel，height，width]
+        label = self.to_tensor_no_normalize(label)
 
         return image, label
     
+    @staticmethod
+    def to_tensor_no_normalize(pic):
+        if isinstance(pic, np.ndarray):     # 是numpy张量
+            img = torch.from_numpy(pic)     # 转换为torch张量
+        else:
+            # 如果是 PIL 图像，转换为 NumPy 数组，然后转换为张量
+            img = torch.ByteTensor(torch.ByteStorage.from_buffer(pic.tobytes()))    # 
+            nchannel = 1 if pic.mode == 'L' else len(pic.mode)
+            img = img.view(pic.size[1], pic.size[0], nchannel)
+            img = img.permute(2, 0, 1).contiguous()
+        return img.float()
+
 def data_prepare(batchsize):
     # 使用绝对路径
     images_dir = os.path.join(project_root, "datasets/images")

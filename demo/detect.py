@@ -14,7 +14,7 @@ from PIL import Image
 
 # 参数设定
 BATCHSIZE = 1
-weight_name="12-14_01-50/237weights"
+weight_name="12-21_20-56/184weights"
 weight_PATH=f'{project_root}/outputs/weights/{weight_name}.pth' 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 current_datetime = datetime.now().strftime("%m-%d_%H-%M")
@@ -38,8 +38,8 @@ def detect():
             image = label.to(device)
             output=D(image)
             output=output.squeeze().cpu().numpy()
-            result.append(output)
             #logger.info(f"推理结果: {output}")
+            result.append(output)
             output_image = Image.fromarray((output * 255).astype(np.uint8), mode='L')
             output_image_path = f'{project_root}/outputs/推理结果/{current_datetime}/推理结果_{len(result)}.png'
             os.makedirs(os.path.dirname(output_image_path), exist_ok=True)

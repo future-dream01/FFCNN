@@ -13,11 +13,11 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 # 参数设定
-EPOCHES = 250    # 轮次数
+EPOCHES = 300    # 轮次数
 BATCHSIZE = 1    # 批次数
 nan_loss=0
-LOAD_CP=False     # 是否需要加载之前的检查点
-CP_PATH= f'{project_root}/outputs/weights/12-12_18-03/163weights.pth'    # 检查点权重文件绝对路径
+LOAD_CP=True     # 是否需要加载之前的检查点
+CP_PATH= f'{project_root}/outputs/weights/12-21_20-56/184weights.pth'    # 检查点权重文件绝对路径
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # 计算设备
 current_datetime = datetime.now().strftime("%m-%d_%H-%M")               # 当前时间
 log_file_path=f'{project_root}/outputs/训练与性能情况/{current_datetime}/损失日志.log'  # 训练日志文件的绝对路径
@@ -54,6 +54,12 @@ def train():
             # 前向传播
             with autocast():
                 output = D(images)
+                labels=labels/255
+                # print(output.max())
+                # print(output.min())
+                # print((labels).max())
+                # print((labels/255).max())
+                #print(output.max)
                 loss_batch = loss_TOTAL(device, output, labels)
             if not torch.isnan(loss_batch):
                 scaler.scale(loss_batch).backward()      # 反向传播

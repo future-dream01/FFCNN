@@ -1,8 +1,12 @@
 # 接受网络输出的退化图和目标图像，计算损失值
 import torch.nn as nn
 import torch
+import math
 import torchvision.models as models
 import torch.nn.functional as F
+import numpy as np
+import pytorch_ssim
+from torch.autograd import Variable
 # 使用预训练的 VGG19 模型作为感知损失的基础
 
 
@@ -46,6 +50,26 @@ class PerceptualLoss(nn.Module):
                 features[layer_name] = x
         return features
 
+
+
+
+def psnr(img1, img2):
+    img1 = np.float64(img1)
+    img2 = np.float64(img2)
+    mse = np.mean( (img1 - img2) ** 2 )
+    if mse == 0:
+        return 100
+    PIXEL_MAX = 255.0
+    return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
+ 
+def ssim(img1,img2):
+    img1 = torch.from_numpy(np.rollaxis(img1, 2)).float().unsqueeze(0)/255.0
+    img2 = torch.from_numpy(np.rollaxis(img2, 2)).float().unsqueeze(0)/255.0   
+    img1 = Variable( img1,  requires_grad=False)    # torch.Size([256, 256, 3])
+    img2 = Variable( img2, requires_grad = False)
+    ssim_value = pytorch_ssim.ssim(img1, img2).item()
+    return ssim_value
+
 def loss_MSE(device, output, label):
     MSE = nn.MSELoss().to(device)
     loss = MSE(output, label)
@@ -65,5 +89,5 @@ def loss_TOTAL(device, output, label):
     mse_loss = loss_MSE(device, output, label)
     l1_loss = loss_L1(device, output, label)
     criterion_loss=loss_criterion(device, output, label)
-    total_loss = mse_loss  + l1_loss +criterion_loss
+    total_loss =0.4* mse_loss  + 0.2*l1_loss +0.4*criterion_loss
     return total_loss
