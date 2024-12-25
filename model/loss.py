@@ -7,6 +7,7 @@ import torch.nn.functional as F
 import numpy as np
 import pytorch_ssim
 from torch.autograd import Variable
+import torch.nn.functional as F
 # 使用预训练的 VGG19 模型作为感知损失的基础
 
 
@@ -53,22 +54,65 @@ class PerceptualLoss(nn.Module):
 
 
 
-def psnr(img1, img2):
-    img1 = np.float64(img1)
-    img2 = np.float64(img2)
-    mse = np.mean( (img1 - img2) ** 2 )
-    if mse == 0:
-        return 100
-    PIXEL_MAX = 255.0
-    return 20 * math.log10(PIXEL_MAX / math.sqrt(mse))
- 
-def ssim(img1,img2):
-    img1 = torch.from_numpy(np.rollaxis(img1, 2)).float().unsqueeze(0)/255.0
-    img2 = torch.from_numpy(np.rollaxis(img2, 2)).float().unsqueeze(0)/255.0   
-    img1 = Variable( img1,  requires_grad=False)    # torch.Size([256, 256, 3])
-    img2 = Variable( img2, requires_grad = False)
-    ssim_value = pytorch_ssim.ssim(img1, img2).item()
-    return ssim_value
+def psnr(img1, img2, max_val=1.0):
+    """
+    计算两个灰度图像张量之间的 PSNR
+    :param img1: 第一个灰度图像张量，形状为 (N, 1, H, W) 或 (1, H, W)
+    :param img2: 第二个灰度图像张量，形状与 img1 相同
+    :param max_val: 图像的最大像素值（默认 1.0）
+    :return: PSNR 值
+    """
+    if img1.ndim == 3:  # 如果是 (1, H, W)，需要扩展为 (N, 1, H, W)
+        img1 = img1.unsqueeze(0)
+        img2 = img2.unsqueeze(0)
+    
+    mse = F.mse_loss(img1, img2, reduction='mean')  # 计算均方误差
+    psnr = 10 * torch.log10(max_val**2 / mse)  # 根据公式计算 PSNR
+    return psnr.cpu()
+
+
+def ssim(img1, img2, max_val=1.0, window_size=11, sigma=1.5):
+    """
+    计算两个灰度图像张量之间的 SSIM
+    :param img1: 第一个灰度图像张量，形状为 (N, 1, H, W) 或 (1, H, W)
+    :param img2: 第二个灰度图像张量，形状与 img1 相同
+    :param max_val: 图像的最大像素值（默认 1.0）
+    :param window_size: 高斯窗口大小
+    :param sigma: 高斯分布的标准差
+    :return: SSIM 值
+    """
+    if img1.ndim == 3:  # 如果是 (1, H, W)，需要扩展为 (N, 1, H, W)
+        img1 = img1.unsqueeze(0)
+        img2 = img2.unsqueeze(0)
+
+    # 生成高斯核
+    channels = 1
+    coords = torch.arange(window_size, dtype=torch.float32) - window_size // 2
+    gauss = torch.exp(-(coords**2) / (2 * sigma**2))
+    gauss = gauss / gauss.sum()
+    kernel = gauss[:, None] * gauss[None, :]
+    kernel = kernel.expand(channels, 1, window_size, window_size).to(img1.device)
+
+    # 计算均值
+    mu1 = F.conv2d(img1, kernel, padding=window_size // 2, groups=channels)
+    mu2 = F.conv2d(img2, kernel, padding=window_size // 2, groups=channels)
+    mu1_sq, mu2_sq = mu1.pow(2), mu2.pow(2)
+    mu1_mu2 = mu1 * mu2
+
+    # 计算方差
+    sigma1_sq = F.conv2d(img1 * img1, kernel, padding=window_size // 2, groups=channels) - mu1_sq
+    sigma2_sq = F.conv2d(img2 * img2, kernel, padding=window_size // 2, groups=channels) - mu2_sq
+    sigma12 = F.conv2d(img1 * img2, kernel, padding=window_size // 2, groups=channels) - mu1_mu2
+
+    # SSIM 常量
+    C1 = (0.01 * max_val) ** 2
+    C2 = (0.03 * max_val) ** 2
+
+    # 计算 SSIM
+    ssim_map = ((2 * mu1_mu2 + C1) * (2 * sigma12 + C2)) / ((mu1_sq + mu2_sq + C1) * (sigma1_sq + sigma2_sq + C2))
+    ssim = ssim_map.mean()
+    return ssim.cpu()
+
 
 def loss_MSE(device, output, label):
     MSE = nn.MSELoss().to(device)

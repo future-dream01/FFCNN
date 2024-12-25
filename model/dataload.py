@@ -55,8 +55,8 @@ class ImageLabelDataset(Dataset):
 
 def data_prepare(batchsize):
     # 使用绝对路径
-    images_dir = os.path.join(project_root, "datasets/images")
-    labels_dir = os.path.join(project_root, "datasets/labels")
+    images_dir = os.path.join(project_root, "datasets/3")
+    labels_dir = os.path.join(project_root, "datasets/4")
     
     train_set = ImageLabelDataset(images_dir, labels_dir)
     dataloader = DataLoader(train_set, batch_size=batchsize, shuffle=True)

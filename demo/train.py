@@ -16,8 +16,8 @@ from PIL import Image
 EPOCHES = 300    # 轮次数
 BATCHSIZE = 1    # 批次数
 nan_loss=0
-LOAD_CP=True     # 是否需要加载之前的检查点
-CP_PATH= f'{project_root}/outputs/weights/12-21_20-56/184weights.pth'    # 检查点权重文件绝对路径
+LOAD_CP=False     # 是否需要加载之前的检查点
+CP_PATH= f'{project_root}/outputs/weights/12-24_14-40/117weights.pth'    # 检查点权重文件绝对路径
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")   # 计算设备
 current_datetime = datetime.now().strftime("%m-%d_%H-%M")               # 当前时间
 log_file_path=f'{project_root}/outputs/训练与性能情况/{current_datetime}/损失日志.log'  # 训练日志文件的绝对路径
@@ -83,13 +83,14 @@ def train():
         loss_epoch = loss_epoch / (batches-nan_loss)  # 本epoch平均损失
         nan_loss=0
         losses.append(loss_epoch)
-        logger.info(f"epoch:{epoch},loss_average:{loss_epoch}")
+        
         if (epoch==start_epoch)and LOAD_CP==False:
             save_checkpoint(D,optimizer_D,epoch,losses, f'{project_root}/outputs/weights/{current_datetime}/{epoch}weights.pth')   # 保存当前模型权重的信息
             min_loss= loss_epoch            # 初始化最小损失
             d_epoch_num = start_epoch       # 初始化删除的轮次数
         else:
             if loss_epoch < min_loss:
+                logger.info(f"epoch:{epoch},loss_average:{loss_epoch}")
                 delpath=f'{project_root}/outputs/weights/{current_datetime}/{d_epoch_num}weights.pth' # 删除对应的权重
                 if os.path.exists(delpath):
                     os.remove(delpath)
@@ -101,6 +102,8 @@ def train():
                 logger.info(f"当前损失曲线已绘制")
                 save_checkpoint(D,optimizer_D,epoch,losses, f'{project_root}/outputs/weights/{current_datetime}/{epoch}weights.pth')   # 保存当前模型权重的信息
                 logger.info(f"保存了当前的第{d_epoch_num}轮权重")
+            else:
+                logger.info(f"epoch:{epoch},loss_average:{loss_epoch},minloss_epoch:{d_epoch_num},minloss:{min_loss}")
         logger.info("当前轮次训练完成")
     logger.info("训练全部完成")
     # 作性能曲线、保存训练权重
