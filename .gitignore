@@ -1,5 +1,9 @@
 *.pth
 /datasets/*
+!/datasets
 /outputs/推理结果/*
 /outputs/训练与性能情况/*
-/outputs/weights/*
+/outputs/*
+!/outputs/推理结果/
+!/outputs/训练与性能情况/
+!/outputs/weights/
