@@ -1,8 +1,9 @@
+# 模型详细结构
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# 退化器骨架
+# 网络骨架
 class Backbone_D(nn.Module):
     def __init__(self):
         super(Backbone_D,self).__init__()
@@ -118,7 +119,7 @@ class Backbone_D(nn.Module):
         self.feture_map.append(out_4)   # 16*16 512
         return self.feture_map
 
-# 退化器特征融合，特征图通道数合成 1 个,尺寸变为128*128
+# 特征融合，特征图通道数合成 1 个,尺寸变为128*128
 class Neck_D(nn.Module):
     def __init__(self):
         super(Neck_D,self).__init__()
@@ -162,6 +163,7 @@ class Upsample_Conv(nn.Module):
         x = self.conv(x)
         return x
 
+# 指定分辨率下采样卷积层
 class CustomDownsample(nn.Module):
     def __init__(self, in_channels, out_channels, output_size):
         super(CustomDownsample, self).__init__()
@@ -174,6 +176,7 @@ class CustomDownsample(nn.Module):
         # 通过卷积层
         x = self.conv(x)
         return x
+
 # 残差模块
 class Resn(nn.Module):
     def __init__(self,input_channel,output_channel):

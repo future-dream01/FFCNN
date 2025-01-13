@@ -1,17 +1,12 @@
 # 接受网络输出的退化图和目标图像，计算损失值
 import torch.nn as nn
 import torch
-import math
 import torchvision.models as models
 import torch.nn.functional as F
-import numpy as np
-import pytorch_ssim
-from torch.autograd import Variable
 import torch.nn.functional as F
+
+
 # 使用预训练的 VGG19 模型作为感知损失的基础
-
-
-
 class PerceptualLoss(nn.Module):
     def __init__(self, layers=['relu2_2', 'relu3_3', 'relu4_3']):
         super(PerceptualLoss, self).__init__()
@@ -53,13 +48,13 @@ class PerceptualLoss(nn.Module):
 
 
 
-
-def psnr(img1, img2, max_val=1.0):
+# PSNR计算
+def psnr(img1, img2, max_val=255.0):
     """
     计算两个灰度图像张量之间的 PSNR
-    :param img1: 第一个灰度图像张量，形状为 (N, 1, H, W) 或 (1, H, W)
-    :param img2: 第二个灰度图像张量，形状与 img1 相同
-    :param max_val: 图像的最大像素值（默认 1.0）
+    :param img1: 第一个灰度图像张量，形状为 (N, 1, H, W) 或 (1, H, W)，值范围为 0-255
+    :param img2: 第二个灰度图像张量，形状与 img1 相同，值范围为 0-255
+    :param max_val: 图像的最大像素值（默认 255.0）
     :return: PSNR 值
     """
     if img1.ndim == 3:  # 如果是 (1, H, W)，需要扩展为 (N, 1, H, W)
@@ -70,7 +65,7 @@ def psnr(img1, img2, max_val=1.0):
     psnr = 10 * torch.log10(max_val**2 / mse)  # 根据公式计算 PSNR
     return psnr.cpu()
 
-
+# SSIM计算
 def ssim(img1, img2, max_val=1.0, window_size=11, sigma=1.5):
     """
     计算两个灰度图像张量之间的 SSIM
@@ -113,22 +108,25 @@ def ssim(img1, img2, max_val=1.0, window_size=11, sigma=1.5):
     ssim = ssim_map.mean()
     return ssim.cpu()
 
-
+# MSE损失
 def loss_MSE(device, output, label):
     MSE = nn.MSELoss().to(device)
     loss = MSE(output, label)
     return loss
 
+# L1损失
 def loss_L1(device, output, label):
     L1 = nn.L1Loss().to(device)
     loss = L1(output, label)
     return loss
 
+# 感知损失
 def loss_criterion(device, output, label):
     criterion = PerceptualLoss().to(device)
     loss = criterion(output, label)
     return loss
 
+# 总损失
 def loss_TOTAL(device, output, label):
     mse_loss = loss_MSE(device, output, label)
     l1_loss = loss_L1(device, output, label)

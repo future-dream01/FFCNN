@@ -1,6 +1,5 @@
-# 生成器完整代码
+# 模型总体结构代码
 
-import torch 
 import torch.nn as nn
 import torch.nn.functional as F     # 函数模块
 from .net import *
@@ -15,13 +14,8 @@ class DeGenerater(nn.Module):
     def forward(self,x):
         self.feature_map=self.backbone(x)
         out_map=self.neck(self.feature_map)
-        # mean=out_map.mean()
-        # std=out_map.std()
-        # norm=(out_map-mean)/std
-        # out_map = (norm - norm.min()) / (norm.max() - norm.min())
+        # 归一化到[0,1]
         output_min = out_map.min()
         output_max = out_map.max()
         out_map = (out_map - output_min) / (output_max - output_min)
-        # print(out_map.max())
-        # print(out_map.min())
         return out_map

@@ -2,19 +2,16 @@ import torch
 import os,sys
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), './..'))
 sys.path.append(project_root)
-from model import DeGenerater, data_prepare_2
-import torch.nn as nn
-import torch.optim as optim
+from model import DeGenerater, data_prepare,psnr,ssim
 from loguru import logger
 from datetime import datetime
-
 import numpy as np
 from PIL import Image
 
 
 # 参数设定
 BATCHSIZE = 1
-weight_name="12-25_13-20/315weights"
+weight_name="01-04_15-25/241weights"
 weight_PATH=f'{project_root}/outputs/weights/{weight_name}.pth' 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 current_datetime = datetime.now().strftime("%m-%d_%H-%M")
@@ -24,7 +21,7 @@ logger.add(log_file_path,rotation="500 MB",level="INFO")    # 添加日志目标
 
 def detect():
     # 训练配置
-    train_dataloader, val_dataloader = data_prepare_2(BATCHSIZE)
+    train_dataloader, val_dataloader = data_prepare(BATCHSIZE)
     checkpoint = torch.load(weight_PATH, map_location=device)
     D = DeGenerater()
     D.load_state_dict(checkpoint['model_state_dict'])
@@ -34,11 +31,11 @@ def detect():
     logger.info(f"weight:{weight_name}")
     logger.info("推理开始")
     with torch.no_grad():  # 不需要梯度
-        for image, label in val_dataloader:
-            image = label.to(device)
+        for image, label in train_dataloader:
+            image, label = image.to(device), label.to(device)
             output = D(image)
+            logger.info(f" PSNR :{psnr(output*255,label)} SSIM：{ssim(output,label/255)}")
             output = output.squeeze().cpu().numpy()
-            #logger.info(f"推理结果: {output}")
             result.append(output)
             
             # 将输出的128x128灰度图截取图像紧贴右侧边界的121x115像素大小的区域
@@ -53,6 +50,7 @@ def detect():
             os.makedirs(os.path.dirname(output_image_path), exist_ok=True)
             resized_image.save(output_image_path)
             logger.info(f"推理结果图像已保存: {output_image_path}")
+            
 
 if __name__=="__main__":
     detect()
