@@ -1,6 +1,0 @@
-2024-09-05 21:41:25.779 | INFO     | __main__:load_checkpoint:97 - 检查点最后一次损失值为:0.18091778212503806
-2024-09-05 21:41:25.780 | INFO     | __main__:train:34 - 开始训练
-2024-09-05 21:41:27.442 | INFO     | __main__:train:57 - epoch:4,batch:1,loss_all:0.08165711909532547
-2024-09-05 21:41:28.420 | INFO     | __main__:train:57 - epoch:4,batch:2,loss_all:0.06789346039295197
-2024-09-05 21:41:29.373 | INFO     | __main__:train:57 - epoch:4,batch:3,loss_all:0.17997530102729797
-2024-09-05 21:41:30.354 | INFO     | __main__:train:57 - epoch:4,batch:4,loss_all:0.10458217561244965
