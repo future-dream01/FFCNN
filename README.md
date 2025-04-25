@@ -1,5 +1,6 @@
-<h1 align="center">FFCNN
-（用于图像去噪的特征融合卷积神经网络）</h1>
+<h1 align="center">FFCNN（Feature Fusion Convolutional Neural Network）
+   
+用于图像去噪的特征融合卷积神经网络 </h1>
 
 **使用方法：**
 1. 本项目的文件结构如下：
