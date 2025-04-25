@@ -1,4 +1,4 @@
-<h1 align="center">OwnNet
+<h1 align="center">FFCNN
 （用于图像去噪的特征融合卷积神经网络）</h1>
 
 **使用方法：**
