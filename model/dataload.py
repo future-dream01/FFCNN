@@ -100,11 +100,11 @@ class Val_Dataset(Dataset):
 
 def data_prepare(batchsize):
     # 使用绝对路径
-    train_images_dir = os.path.join(project_root, "datasets/11") # 训练集images
-    train_labels_dir = os.path.join(project_root, "datasets/22") # 训练集labels
+    train_images_dir = os.path.join(project_root, "datasets/datasets_simple/111") # 训练集images
+    train_labels_dir = os.path.join(project_root, "datasets/datasets_simple/222") # 训练集labels
 
-    val_image_dir= os.path.join(project_root, "datasets/555") # 验证集images
-    val_lable_dir= os.path.join(project_root, "datasets/666") # 验证集labels
+    val_image_dir= os.path.join(project_root, "datasets/datasets_simple/555") # 验证集images
+    val_lable_dir= os.path.join(project_root, "datasets/datasets_simple/666") # 验证集labels
     
     train_set = Train_Dataset(train_images_dir, train_labels_dir)
     val_set = Val_Dataset(val_image_dir, val_lable_dir)
