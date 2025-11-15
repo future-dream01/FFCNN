@@ -1,5 +1,9 @@
-*.pth
-*.zip
-*.png
-*.txt
-*.log
+datasets/
+!datasets/.gitkeep
+outputs/推理结果/**
+!outputs/推理结果/.gitkeep
+outputs/训练与性能情况/**
+!outputs/训练与性能情况/.gitkeep
+outputs/weights/**
+!outputs/weights/.gitkeep
+
