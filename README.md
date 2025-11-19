@@ -4,7 +4,7 @@
 
 # 使用方法：
 1. 本项目的文件结构如下：
-   - datasets文件夹：存放训练集和验证集
+   - datasets文件夹：存放训练集和测试集
    - demo文件夹：存放训练脚本(`train.py`)和推理脚本(`detect.py`)
    - model文件夹：存放数据加载(`dataload.py`)、模型结构(`net.py`)、损失计算(`loss.py`)、参数图像绘制(`graph.py`)的脚本
    - outputs文件夹
@@ -14,8 +14,8 @@
   
 2. 本项目的训练方法：
    - 首先配环境，在当前的conda环境中运行`pip install -r requirements.txt`，安装项目所需的基本python包。
-   - 将训练集和验证集放入datasets文件夹
-   - 在`dataload.py`脚本中修改**train_images_dir**、**train_labels_dir**、**val_image_dir**、**val_lable_dir**，替换为现在训练集、验证集路径
+   - 将训练集和测试集放入datasets文件夹
+   - 在`dataload.py`脚本中修改**train_images_dir**、**train_labels_dir**、**val_image_dir**、**val_lable_dir**，替换为现在训练集、测试集路径
    - 在`train.py`中设置轮次数**EPOCHES**、批次数**BATCHSIZE**；若是从头开始训练，则**LOAD_CP**值需为False，表示不需要加载之前的检查点，若从上次中断的检查点开始训练，则**LOAD_CP**需为True，同时设置**CP_PATH**为检查点权重文件路径。
    - 运行`train.py`即可开始训练，训练性能情况在**训练与性能情况**文件夹中；权重文件在**weights**文件夹中
 
